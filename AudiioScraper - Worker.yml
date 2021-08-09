@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+    - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+- task: UseDotNet@2
+  displayName: 'Use .NET SDK (5.0)'
+  inputs:
+    packageType: sdk
+    version: 5.0.301
+    includePreviewVersions: true
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: DotNetCoreCLI@2
+  displayName: Restore NuGet packages
+  inputs:
+    command: 'restore'
+    projects: | 
+      **/LetsEncrypt.Worker.csproj
+- task: DotNetCoreCLI@2
+  displayName: Build AudiioScraper.Worker.csproj
+  inputs:
+    command: 'build'
+    projects: | 
+      **/AudiioScraper.Worker.csproj
+- script: |
+    cd ./AudiioScraper/AudiioScraper.Worker
+    docker build -t djohnnie/audiio-worker .
+    docker login -u $(dockerId) -p $(dockerPwd)
+    docker push djohnnie/audiio-worker
+  displayName: Build & Push djohnnie/audiio-worker
