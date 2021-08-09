@@ -5,10 +5,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["AudiioScraper.Worker/AudiioScraper.Worker.csproj", "AudiioScraper.Worker/"]
-RUN dotnet restore "AudiioScraper.Worker/AudiioScraper.Worker.csproj"
-COPY . .
+COPY ["AudiioScraper.Worker.csproj", "AudiioScraper.Worker/"]
 WORKDIR "/src/AudiioScraper.Worker"
+RUN dotnet restore "AudiioScraper.Worker.csproj"
+COPY . .
 RUN dotnet build "AudiioScraper.Worker.csproj" -c Release -o /app/build
 
 FROM build AS publish
