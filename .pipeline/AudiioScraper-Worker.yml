@@ -21,7 +21,7 @@ steps:
   inputs:
     command: 'restore'
     projects: | 
-      **/LetsEncrypt.Worker.csproj
+      **/AudiioScraper.Worker.csproj
 - task: DotNetCoreCLI@2
   displayName: Build AudiioScraper.Worker.csproj
   inputs:
