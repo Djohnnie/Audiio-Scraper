@@ -29,7 +29,7 @@ steps:
     projects: | 
       **/AudiioScraper.Worker.csproj
 - script: |
-    cd ./AudiioScraper/AudiioScraper.Worker
+    cd ./AudiioScraper
     docker build -t djohnnie/audiio-worker .
     docker login -u $(dockerId) -p $(dockerPwd)
     docker push djohnnie/audiio-worker
