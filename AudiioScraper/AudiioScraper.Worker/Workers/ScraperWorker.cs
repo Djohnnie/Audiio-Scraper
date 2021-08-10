@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AudiioScraper.Worker.Helpers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ namespace AudiioScraper.Worker.Workers
         private readonly ILogger<ScraperWorker> _logger;
 
         public ScraperWorker(
+            IConfiguration configuration,
             IServiceScopeFactory serviceScopeFactory,
             ILogger<ScraperWorker> logger)
         {

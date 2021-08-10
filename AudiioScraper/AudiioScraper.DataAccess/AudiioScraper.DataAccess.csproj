@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AudiioScraper.Common\AudiioScraper.Common.csproj" />
     <ProjectReference Include="..\AudiioScraper.Entities\AudiioScraper.Entities.csproj" />
   </ItemGroup>
 

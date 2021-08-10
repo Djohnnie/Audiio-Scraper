@@ -1,10 +1,11 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AudiioScraper.DataAccess;
+﻿using AudiioScraper.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AudiioScraper.Worker.Workers
 {
@@ -28,7 +29,19 @@ namespace AudiioScraper.Worker.Workers
 
             if (dbContext != null)
             {
-                await dbContext.Database.MigrateAsync(stoppingToken);
+                var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync(stoppingToken);
+
+                if (pendingMigrations.Any())
+                {
+                    _logger.LogInformation($"There are {pendingMigrations.Count()} database migrations.");
+
+                    await dbContext.Database.MigrateAsync(stoppingToken);
+                    _logger.LogInformation("Database has been successfully migrated.");
+                }
+                else
+                {
+                    _logger.LogInformation("Database is up-to-date.");
+                }
             }
             else
             {

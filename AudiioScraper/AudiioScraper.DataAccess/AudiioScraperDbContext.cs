@@ -1,5 +1,6 @@
 ﻿using AudiioScraper.Entities;
 using AudiioScraper.Entities.Enums;
+using AudiioScraper.Worker.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,7 @@ namespace AudiioScraper.DataAccess
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connectionString = _configuration.GetValue<string>("DB_CONNECTION_STRING");
+            string connectionString = _configuration.GetConnectionString();
             optionsBuilder.UseSqlServer(connectionString);
         }
 
