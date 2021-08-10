@@ -5,7 +5,7 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["AudiioScraper.Worker.csproj", "AudiioScraper.Worker/"]
+COPY ["../", "/"]
 WORKDIR "/src/AudiioScraper.Worker"
 RUN dotnet restore "AudiioScraper.Worker.csproj"
 COPY . .
