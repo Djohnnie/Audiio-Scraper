@@ -1,6 +1,6 @@
-﻿using AudiioScraper.Entities;
+﻿using AudiioScraper.Common.Extensions;
+using AudiioScraper.Entities;
 using AudiioScraper.Entities.Enums;
-using AudiioScraper.Worker.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;

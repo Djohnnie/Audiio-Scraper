@@ -31,6 +31,12 @@ namespace AudiioScraper.Worker.Helpers
 
         public async Task Go(CancellationToken stoppingToken)
         {
+            await ScrapeMusic(stoppingToken);
+            await ScrapeSfx(stoppingToken);
+        }
+
+        private async Task ScrapeMusic(CancellationToken stoppingToken)
+        {
             string baseUrl = "https://audiio.com/api/tag/{0}";
             int page = 0;
             bool tracksFound = false;
@@ -46,13 +52,14 @@ namespace AudiioScraper.Worker.Helpers
 
                 if (response.Data != null)
                 {
-                    _logger.LogInformation("Scraper found {tracks} music tracks on page {page}", response.Data.Tracks.Count, page);
+                    _logger.LogInformation("Scraper found {tracks} music tracks on page {page}", response.Data.Tracks.Count,
+                        page);
 
                     tracksFound = response.Data.Tracks.Any();
 
                     foreach (var track in response.Data.Tracks)
                     {
-                        if (!await _dbContext.AssetsToDownload.AnyAsync(x => x.AudiioId == track.Id, stoppingToken))
+                        if (!await _dbContext.AssetsToDownload.AnyAsync(x => x.AudiioId == track.Id && x.Kind == AudiioKind.Music, stoppingToken))
                         {
                             await _dbContext.AssetsToDownload.AddAsync(new AssetToDownload
                             {
@@ -73,10 +80,59 @@ namespace AudiioScraper.Worker.Helpers
 
                     await _dbContext.SaveChangesAsync(stoppingToken);
                 }
-
             } while (tracksFound);
 
             _logger.LogInformation($"{numberOfNewTracks} new music tracks scraped!");
+        }
+
+        private async Task ScrapeSfx(CancellationToken stoppingToken)
+        {
+            string baseUrl = "https://audiio.com/api/sfx/tag/{0}";
+            int page = 0;
+            bool tracksFound = false;
+            int numberOfNewTracks = 0;
+
+            do
+            {
+                page++;
+                var scrapedOn = DateTime.Now;
+                var client = new RestClient(string.Format(baseUrl, page));
+                var request = new RestRequest(Method.GET);
+                var response = await client.ExecuteAsync<AudiioMusicResponse>(request, stoppingToken);
+
+                if (response.Data != null)
+                {
+                    _logger.LogInformation("Scraper found {tracks} SFX tracks on page {page}", response.Data.Tracks.Count,
+                        page);
+
+                    tracksFound = response.Data.Tracks.Any();
+
+                    foreach (var track in response.Data.Tracks)
+                    {
+                        if (!await _dbContext.AssetsToDownload.AnyAsync(x => x.AudiioId == track.Id && x.Kind == AudiioKind.Sfx, stoppingToken))
+                        {
+                            await _dbContext.AssetsToDownload.AddAsync(new AssetToDownload
+                            {
+                                Kind = AudiioKind.Sfx,
+                                AudiioId = track.Id,
+                                Title = track.Title,
+                                Artist = track.Artist?.Name,
+                                Album = track.Artist?.Name,
+                                AudiioFileName = track.Sound_Pro.Replace("/", ""),
+                                ArtistImageFileName = track.Album?.Image?.Replace("/", ""),
+                                AlbumImageFileName = track.Album?.Image?.Replace("/", ""),
+                                ScrapedOn = scrapedOn,
+                            }, stoppingToken);
+
+                            numberOfNewTracks++;
+                        }
+                    }
+
+                    await _dbContext.SaveChangesAsync(stoppingToken);
+                }
+            } while (tracksFound);
+
+            _logger.LogInformation($"{numberOfNewTracks} new SFX tracks scraped!");
         }
     }
 }

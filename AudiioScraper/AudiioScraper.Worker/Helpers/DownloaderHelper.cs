@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using AudiioScraper.Common.Extensions;
 using AudiioScraper.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,12 +36,16 @@ namespace AudiioScraper.Worker.Helpers
             {
                 using var webClient = new WebClient();
 
-                var musicPath = Path.Combine(_configuration.GetValue<string>("MUSIC_DOWNLOAD_PATH"), nextAssetToDownload.AudiioFileName);
-                var artistPath = Path.Combine(_configuration.GetValue<string>("MUSIC_DOWNLOAD_PATH"), nextAssetToDownload.AudiioFileName.Replace(Path.GetExtension(nextAssetToDownload.AudiioFileName), $"-artist{Path.GetExtension(nextAssetToDownload.ArtistImageFileName)}"));
-                var albumPath = Path.Combine(_configuration.GetValue<string>("MUSIC_DOWNLOAD_PATH"), nextAssetToDownload.AudiioFileName.Replace(Path.GetExtension(nextAssetToDownload.AudiioFileName), $"-album{Path.GetExtension(nextAssetToDownload.AlbumImageFileName)}"));
-                var musicUri = $"{_configuration.GetValue<string>("MUSIC_CDN_BASE_ADDRESS")}/{nextAssetToDownload.AudiioFileName}";
-                var artistUri = $"{_configuration.GetValue<string>("ART_CDN_BASE_ADDRESS")}/{nextAssetToDownload.ArtistImageFileName}";
-                var albumUri = $"{_configuration.GetValue<string>("ART_CDN_BASE_ADDRESS")}/{nextAssetToDownload.AlbumImageFileName}";
+                string downloadMusicPath = _configuration.GetMusicDownloadPath();
+                string musicCdnBaseAddress = _configuration.GetMusicCdnBaseAddress();
+                string artCdnBaseAddress = _configuration.GetArtCdnBaseAddress();
+
+                var musicPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName);
+                var artistPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName.Replace(Path.GetExtension(nextAssetToDownload.AudiioFileName), $"-artist{Path.GetExtension(nextAssetToDownload.ArtistImageFileName)}"));
+                var albumPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName.Replace(Path.GetExtension(nextAssetToDownload.AudiioFileName), $"-album{Path.GetExtension(nextAssetToDownload.AlbumImageFileName)}"));
+                var musicUri = $"{musicCdnBaseAddress}/{nextAssetToDownload.AudiioFileName}";
+                var artistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
+                var albumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
 
                 await webClient.DownloadFileTaskAsync(musicUri, musicPath);
                 await webClient.DownloadFileTaskAsync(artistUri, artistPath);
