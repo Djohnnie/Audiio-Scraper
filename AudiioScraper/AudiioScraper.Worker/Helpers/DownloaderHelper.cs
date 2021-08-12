@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudiioScraper.Common.Extensions;
 using AudiioScraper.DataAccess;
+using AudiioScraper.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -34,25 +35,70 @@ namespace AudiioScraper.Worker.Helpers
 
             if (nextAssetToDownload != null)
             {
-                using var webClient = new WebClient();
+                try
+                {
+                    using var webClient = new WebClient();
 
-                string downloadMusicPath = _configuration.GetMusicDownloadPath();
-                string musicCdnBaseAddress = _configuration.GetMusicCdnBaseAddress();
-                string artCdnBaseAddress = _configuration.GetArtCdnBaseAddress();
+                    string downloadMusicPath = _configuration.GetMusicDownloadPath();
+                    string downloadSfxPath = _configuration.GetSfxDownloadPath();
+                    string musicCdnBaseAddress = _configuration.GetMusicCdnBaseAddress();
+                    string sfxCdnBaseAddress = _configuration.GetSfxCdnBaseAddress();
+                    string artCdnBaseAddress = _configuration.GetArtCdnBaseAddress();
 
-                var musicPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName);
-                var artistPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName.Replace(Path.GetExtension(nextAssetToDownload.AudiioFileName), $"-artist{Path.GetExtension(nextAssetToDownload.ArtistImageFileName)}"));
-                var albumPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName.Replace(Path.GetExtension(nextAssetToDownload.AudiioFileName), $"-album{Path.GetExtension(nextAssetToDownload.AlbumImageFileName)}"));
-                var musicUri = $"{musicCdnBaseAddress}/{nextAssetToDownload.AudiioFileName}";
-                var artistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
-                var albumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
+                    switch (nextAssetToDownload.Kind)
+                    {
+                        case AudiioKind.Music:
+                            var musicPath = Path.Combine(downloadMusicPath, nextAssetToDownload.AudiioFileName);
+                            var musicUri = $"{musicCdnBaseAddress}/{nextAssetToDownload.AudiioFileName}";
+                            var musicArtistPath = Path.Combine(downloadMusicPath,
+                                nextAssetToDownload.AudiioFileName.Replace(
+                                    Path.GetExtension(nextAssetToDownload.AudiioFileName),
+                                    $"-artist{Path.GetExtension(nextAssetToDownload.ArtistImageFileName)}"));
+                            var musicAlbumPath = Path.Combine(downloadMusicPath,
+                                nextAssetToDownload.AudiioFileName.Replace(
+                                    Path.GetExtension(nextAssetToDownload.AudiioFileName),
+                                    $"-album{Path.GetExtension(nextAssetToDownload.AlbumImageFileName)}"));
+                            var musicArtistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
+                            var musicAlbumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
 
-                await webClient.DownloadFileTaskAsync(musicUri, musicPath);
-                await webClient.DownloadFileTaskAsync(artistUri, artistPath);
-                await webClient.DownloadFileTaskAsync(albumUri, albumPath);
+                            await webClient.DownloadFileTaskAsync(musicUri, musicPath);
+                            await webClient.DownloadFileTaskAsync(musicArtistUri, musicArtistPath);
+                            await webClient.DownloadFileTaskAsync(musicAlbumUri, musicAlbumPath);
 
-                nextAssetToDownload.DownloadedOn = DateTime.Now;
-                await _dbContext.SaveChangesAsync(stoppingToken);
+                            _logger.LogInformation(
+                                $"Dowloaded music track '{nextAssetToDownload.Title}' successfully.");
+
+                            break;
+                        case AudiioKind.Sfx:
+                            var sfxPath = Path.Combine(downloadSfxPath, nextAssetToDownload.AudiioFileName);
+                            var sfxUri = $"{sfxCdnBaseAddress}/{nextAssetToDownload.AudiioFileName}";
+                            var sfxArtistPath = Path.Combine(downloadSfxPath,
+                                nextAssetToDownload.AudiioFileName.Replace(
+                                    Path.GetExtension(nextAssetToDownload.AudiioFileName),
+                                    $"-artist{Path.GetExtension(nextAssetToDownload.ArtistImageFileName)}"));
+                            var sfxAlbumPath = Path.Combine(downloadSfxPath,
+                                nextAssetToDownload.AudiioFileName.Replace(
+                                    Path.GetExtension(nextAssetToDownload.AudiioFileName),
+                                    $"-album{Path.GetExtension(nextAssetToDownload.AlbumImageFileName)}"));
+                            var sfxArtistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
+                            var sfxAlbumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
+
+                            await webClient.DownloadFileTaskAsync(sfxUri, sfxPath);
+                            await webClient.DownloadFileTaskAsync(sfxArtistUri, sfxArtistPath);
+                            await webClient.DownloadFileTaskAsync(sfxAlbumUri, sfxAlbumPath);
+
+                            _logger.LogInformation($"Dowloaded SFX track '{nextAssetToDownload.Title}' successfully.");
+
+                            break;
+                    }
+
+                    nextAssetToDownload.DownloadedOn = DateTime.Now;
+                    await _dbContext.SaveChangesAsync(stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation($"Dowload failed! ({ex.Message})");
+                }
             }
         }
     }
