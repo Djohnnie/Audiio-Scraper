@@ -61,9 +61,20 @@ namespace AudiioScraper.Worker.Helpers
                             var musicArtistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
                             var musicAlbumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
 
-                            await webClient.DownloadFileTaskAsync(musicUri, musicPath);
-                            await webClient.DownloadFileTaskAsync(musicArtistUri, musicArtistPath);
-                            await webClient.DownloadFileTaskAsync(musicAlbumUri, musicAlbumPath);
+                            if (!string.IsNullOrWhiteSpace(nextAssetToDownload.AudiioFileName))
+                            {
+                                await webClient.DownloadFileTaskAsync(musicUri, musicPath);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(nextAssetToDownload.ArtistImageFileName))
+                            {
+                                await webClient.DownloadFileTaskAsync(musicArtistUri, musicArtistPath);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(nextAssetToDownload.AlbumImageFileName))
+                            {
+                                await webClient.DownloadFileTaskAsync(musicAlbumUri, musicAlbumPath);
+                            }
 
                             _logger.LogInformation(
                                 $"Dowloaded music track '{nextAssetToDownload.Title}' successfully.");
