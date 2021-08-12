@@ -83,9 +83,20 @@ namespace AudiioScraper.Worker.Helpers
                             var sfxArtistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
                             var sfxAlbumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
 
-                            await webClient.DownloadFileTaskAsync(sfxUri, sfxPath);
-                            await webClient.DownloadFileTaskAsync(sfxArtistUri, sfxArtistPath);
-                            await webClient.DownloadFileTaskAsync(sfxAlbumUri, sfxAlbumPath);
+                            if (!string.IsNullOrWhiteSpace(sfxUri))
+                            {
+                                await webClient.DownloadFileTaskAsync(sfxUri, sfxPath);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(sfxArtistUri))
+                            {
+                                await webClient.DownloadFileTaskAsync(sfxArtistUri, sfxArtistPath);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(sfxAlbumUri))
+                            {
+                                await webClient.DownloadFileTaskAsync(sfxAlbumUri, sfxAlbumPath);
+                            }
 
                             _logger.LogInformation($"Dowloaded SFX track '{nextAssetToDownload.Title}' successfully.");
 
