@@ -83,17 +83,17 @@ namespace AudiioScraper.Worker.Helpers
                             var sfxArtistUri = $"{artCdnBaseAddress}/{nextAssetToDownload.ArtistImageFileName}";
                             var sfxAlbumUri = $"{artCdnBaseAddress}/{nextAssetToDownload.AlbumImageFileName}";
 
-                            if (!string.IsNullOrWhiteSpace(sfxUri))
+                            if (!string.IsNullOrWhiteSpace(nextAssetToDownload.AudiioFileName))
                             {
                                 await webClient.DownloadFileTaskAsync(sfxUri, sfxPath);
                             }
 
-                            if (!string.IsNullOrWhiteSpace(sfxArtistUri))
+                            if (!string.IsNullOrWhiteSpace(nextAssetToDownload.ArtistImageFileName))
                             {
                                 await webClient.DownloadFileTaskAsync(sfxArtistUri, sfxArtistPath);
                             }
 
-                            if (!string.IsNullOrWhiteSpace(sfxAlbumUri))
+                            if (!string.IsNullOrWhiteSpace(nextAssetToDownload.AlbumImageFileName))
                             {
                                 await webClient.DownloadFileTaskAsync(sfxAlbumUri, sfxAlbumPath);
                             }
