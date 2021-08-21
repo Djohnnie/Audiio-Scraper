@@ -30,8 +30,8 @@ namespace AudiioScraper.Worker.Helpers
 
         public async Task Go(CancellationToken stoppingToken)
         {
-            var nextAssetToDownload =
-                await _dbContext.AssetsToDownload.FirstOrDefaultAsync(x => !x.DownloadedOn.HasValue, stoppingToken);
+            var nextAssetToDownload = await _dbContext.AssetsToDownload.FirstOrDefaultAsync(
+                x => !x.DownloadedOn.HasValue && !x.DownloadError, stoppingToken);
 
             if (nextAssetToDownload != null)
             {
@@ -120,6 +120,9 @@ namespace AudiioScraper.Worker.Helpers
                 catch (Exception ex)
                 {
                     _logger.LogInformation($"Dowload failed! ({ex.Message})");
+
+                    nextAssetToDownload.DownloadError = true;
+                    await _dbContext.SaveChangesAsync(stoppingToken);
                 }
             }
         }

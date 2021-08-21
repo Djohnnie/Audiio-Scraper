@@ -17,5 +17,6 @@ namespace AudiioScraper.Entities
         public string AlbumImageFileName { get; set; }
         public DateTime ScrapedOn { get; set; }
         public DateTime? DownloadedOn { get; set; }
+        public bool DownloadError { get; set; }
     }
 }

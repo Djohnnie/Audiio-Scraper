@@ -4,14 +4,16 @@ using AudiioScraper.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AudiioScraper.DataAccess.Migrations
 {
     [DbContext(typeof(AudiioScraperDbContext))]
-    partial class AudiioScraperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210821201438_Add-DownloadError-State")]
+    partial class AddDownloadErrorState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
